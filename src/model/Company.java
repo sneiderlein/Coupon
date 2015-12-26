@@ -18,12 +18,12 @@ public class Company {
     Constructors
      */
 
-    public Company(long id, String compName, String password, String email, Collection<Coupon> coupons) {
+    public Company(long id, String compName, String password, String email) {
         this.id = id;
         this.compName = compName;
         this.password = password;
         this.email = email;
-        this.coupons = coupons;
+       // this.coupons = coupons;
     }
 
     /*
