@@ -122,4 +122,23 @@ public class Coupon {
     public void setImagePath(String imagePath) {
         this.imagePath = imagePath;
     }
+
+    /*
+    Methods
+     */
+
+    @Override
+    public String toString() {
+        return "Coupon{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                ", amount=" + amount +
+                ", type=" + type +
+                ", message='" + message + '\'' +
+                ", price=" + price +
+                ", imagePath='" + imagePath + '\'' +
+                '}';
+    }
 }
