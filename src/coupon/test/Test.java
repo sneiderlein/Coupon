@@ -1,5 +1,6 @@
 package coupon.test;
 
+import coupon.dao.CompanyDAO;
 import coupon.dao.CompanyDBDAO;
 import coupon.dao.DBIOHelper;
 import coupon.exception.CouponDBException;
@@ -7,6 +8,7 @@ import coupon.exception.CouponException;
 import coupon.model.Company;
 
 import java.sql.*;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,7 +21,7 @@ public class Test {
 //        CompanyDBDAO dao = new CompanyDBDAO();
 //
 //        try {
-//        Company c1 = new Company("Hello", "Something", "asddd@asddd.com");
+        Company c1 = new Company("weeeeee", "OOOOOO", "asdasdasjgjgjgjg@asddd.com");
 //        Company c2 = new Company("2IByeBM", "jkasldkj", "jjdh@asddd.com");
 //        Company c3 = new Company("Joy", "asldkjjfi", "jjdh@asddd.com");
 //        Company c4 = new Company("Sway", "irotieo", "jjdh@asddd.com");
@@ -52,14 +54,31 @@ public class Test {
 //        }
 
         DBIOHelper helper = new DBIOHelper();
-//        Map<String, String> shit = new HashMap<>();
-//        shit.put("COMP_NAME", "thename");
-//        shit.put("PASSWORD", "thepass");
-//        shit.put("EMAIL", "theMail");
+        CompanyDBDAO dao = new CompanyDBDAO();
 
 
-        System.out.println(helper.getRecord("Company", 19L, null));
+        c1.setId(21);
+
+        System.out.println(dao.login("Joy1", "theNewPass"));
+
+
+
 
         System.out.println("Exiting");
+    }
+
+    public static void printTable(String table)
+    {
+        DBIOHelper helper = new DBIOHelper();
+        Collection<Map<String, String> > map = null;
+        try {
+            map = helper.getAllRecords(table, null);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        for(Map<String, String> lil : map)
+        {
+            System.out.println(lil);
+        }
     }
 }

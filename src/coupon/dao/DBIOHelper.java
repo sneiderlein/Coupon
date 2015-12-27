@@ -157,8 +157,7 @@ public class DBIOHelper {
 
         return resultMap;
     }
-
-    public Collection<Map<String, String> > getAllRecords(String tablem, @Nullable Connection con)throws SQLException
+public Map<String, String> getRecord(String table, String col ,String value, @Nullable Connection con)throws SQLException
     {
         //If connection was created here we have to close it if not the caller will have to.
         boolean needToClose = false;
@@ -167,8 +166,77 @@ public class DBIOHelper {
             needToClose = true;
         }
 
+        String sql = "SELECT * FROM " + table + " WHERE "+ col + " = '" + value + "'";
 
+        Logger.log("Getting DB Record", sql);
+
+        Statement st = con.createStatement();
+        ResultSet rs = st.executeQuery(sql);
+
+        //Create a map which will be returned
+        Map<String, String> resultMap = new HashMap<>();
+
+        while(rs.next())
+        {
+            resultMap.put("ID", rs.getString("ID"));
+            resultMap.put("COMP_NAME", rs.getString("COMP_NAME"));
+            resultMap.put("PASSWORD", rs.getString("PASSWORD"));
+            resultMap.put("EMAIL", rs.getString("EMAIL"));
+
+        }
+
+
+        rs.close();
+        st.close();
+
+        if(needToClose)
+            con.close();
+
+        return resultMap;
+    }
+
+    public Collection<Map<String, String> > getAllRecords(String table, @Nullable Connection con)throws SQLException
+    {
+        //Connection can be created outside, and sent here, so that the sender can chain many
+        //calls to the DB using only one connection.
+        //If connection was created here we have to close it if not the caller will have to.
+        boolean needToClose = false;
+        if(con == null) {
+            con = DBConnection.getConnection();
+            needToClose = true;
+        }
+
+        //Return a collection of maps which represent records in DB
         Collection<Map<String, String>  > mapCollection = new LinkedList<>();
+
+        String sql = "SELECT * FROM " + table;
+        Logger.log("Getting All DB Record", sql);
+        Statement st = con.createStatement();
+        ResultSet rs = st.executeQuery(sql);
+
+        //We don't now the number of Columns nor they're names so we will have to use MetaData
+        ResultSetMetaData meta = rs.getMetaData();
+
+        //One of the records
+        Map<String, String> recordMap = null;
+
+        while(rs.next())
+        {
+            //Create a new one for every record
+            recordMap = new HashMap<>();
+            for(int i = 1; i <= meta.getColumnCount(); i++)
+            {
+                //Add every column to the Map
+                recordMap.put(meta.getColumnName(i), rs.getString(i));
+
+            }
+
+            //Add created map to the collection
+            mapCollection.add(recordMap);
+        }
+
+
+
         return mapCollection;
     }
 
