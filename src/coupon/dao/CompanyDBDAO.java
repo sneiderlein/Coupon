@@ -1,11 +1,14 @@
-package dao;
+package coupon.dao;
 
-import exception.CouponException;
-import model.Company;
-import model.Coupon;
+import coupon.Logger;
+import coupon.exception.CouponDBException;
+import coupon.model.Company;
+import coupon.model.Coupon;
 
 import java.sql.*;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CompanyDBDAO implements CompanyDAO {
 
@@ -14,8 +17,9 @@ public class CompanyDBDAO implements CompanyDAO {
     Attributes
     */
 
-    Connection con; //Will be null, and it's ok
-    Statement st;
+    private DBIOHelper helper;
+
+
 
     /*
     Constructors
@@ -23,7 +27,7 @@ public class CompanyDBDAO implements CompanyDAO {
 
     public CompanyDBDAO()
     {
-
+        helper = new DBIOHelper();
     }
     
     /*
@@ -31,28 +35,30 @@ public class CompanyDBDAO implements CompanyDAO {
     */
 
     @Override
-    public void createCompany(Company c)throws SQLException, CouponException {
+    public void createCompany(Company c)throws CouponDBException {
 
-        //get a connection
-        Connection con = DBConnection.getConnection();
+        //Helper accepts a Map containing all company info so we will create one
+        Map<String, String> companyMap = new HashMap<>();
 
-        //Check if a company like that already exists in the database
-        if(exists(con, c)) throw new CouponException("Company '" + c.getCompName() +"' already exists");
+        companyMap.put("COMP_NAME", c.getCompName());
+        companyMap.put("PASSWORD", c.getPassword());
+        companyMap.put("EMAIL", c.getEmail());
 
-        //if not thrown out, add the company
-        String query = "INSERT INTO Company (COMP_NAME, PASSWORD, EMAIL)" +
-                       "VALUES (?, ? ,?)";
+        try (Connection con = DBConnection.getConnection())
+        {
 
-        PreparedStatement pst = con.prepareStatement(query);
-        pst.setString(1, c.getCompName());
-        pst.setString(2, c.getPassword());
-        pst.setString(3, c.getEmail());
+            boolean exists = helper.cellExists("Company", "COMP_NAME",c.getCompName(), con );
+            if(exists) {
+                throw new CouponDBException("Record already exists", c.getCompName() + " already exists in DB.");
+            }
+            helper.addRecord("Company",companyMap, con);
+            Logger.log(c.getCompName(), "Added to DB");
 
-        pst.executeUpdate();
-
-        System.out.println("Added: " + c.getCompName());
-        con.close();
-        pst.close();
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     @Override

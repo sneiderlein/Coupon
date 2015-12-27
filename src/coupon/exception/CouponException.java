@@ -1,20 +1,21 @@
-package exception;
+package coupon.exception;
+
+import coupon.Logger;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-public class CouponException extends RuntimeException{
 
+public class CouponException extends RuntimeException {
     /*
-    Attributes
-    */
-    private String titleMessage;
-    private String description;
-    private LocalDate date;
-    private LocalTime time;
-    
-    
+        Attributes
+        */
+    protected String titleMessage;
+    protected String description;
+    protected LocalDate date;
+    protected LocalTime time;
+
+
     /*
     Constructors
     */
@@ -31,6 +32,8 @@ public class CouponException extends RuntimeException{
 
         this.date = LocalDate.now();
         this.time = LocalTime.now();
+
+        Logger.exLog(titleMessage, description);
     }
 
     /*

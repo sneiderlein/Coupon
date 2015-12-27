@@ -1,4 +1,4 @@
-package model;
+package coupon.model;
 
 public enum CouponType {
     RESTAURANTS,

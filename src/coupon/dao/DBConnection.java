@@ -1,8 +1,7 @@
-package dao;
+package coupon.dao;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
-import javax.sql.*;
 import java.beans.PropertyVetoException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -46,7 +45,7 @@ public class DBConnection {
         try {
             ds.setDriverClass(DRIVER_NAME);
         } catch (PropertyVetoException e) {
-            //TODO: Throw custom exception
+            //TODO: Throw custom coupon.exception
         }
         ds.setJdbcUrl(URL);
         ds.setUser(USER_NAME);

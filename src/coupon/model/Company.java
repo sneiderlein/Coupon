@@ -1,4 +1,4 @@
-package model;
+package coupon.model;
 
 import java.util.Collection;
 
@@ -18,8 +18,8 @@ public class Company {
     Constructors
      */
 
-    public Company(long id, String compName, String password, String email) {
-        this.id = id;
+    public Company(String compName, String password, String email) {
+
         this.compName = compName;
         this.password = password;
         this.email = email;
