@@ -44,7 +44,6 @@ public class CompanyDBDAO implements CompanyDAO {
                        "VALUES (?, ? ,?)";
 
         PreparedStatement pst = con.prepareStatement(query);
-
         pst.setString(1, c.getCompName());
         pst.setString(2, c.getPassword());
         pst.setString(3, c.getEmail());
@@ -87,7 +86,7 @@ public class CompanyDBDAO implements CompanyDAO {
     }
 
     /*
-    Private
+    Private methods
      */
 
     private boolean exists(Connection con, Company company) throws SQLException
