@@ -2,6 +2,7 @@ package coupon.dao;
 
 import coupon.Logger;
 import coupon.exception.CouponDBException;
+import coupon.exception.CouponException;
 import coupon.model.Company;
 import coupon.model.Coupon;
 
@@ -27,7 +28,7 @@ public class CompanyDBDAO implements CompanyDAO {
     {
         helper = new DBIOHelper();
     }
-    
+
     /*
     Methods
     */
@@ -36,13 +37,16 @@ public class CompanyDBDAO implements CompanyDAO {
     public void createCompany(Company c)throws CouponDBException {
 
         //Helper accepts a Map containing all company info so we will create one
-        Map<String, String> companyMap = companyToMap(c);
+        TreeMap<String, Object> companyMap = companyToMap(c);
 
+        //Helper allows creating a connection outside for chaining operations together with single connection
         try (Connection con = DBConnection.getConnection())
         {
 
+            //checks if cell with that name exists in db
             boolean exists = helper.cellExists("Company", "COMP_NAME",c.getCompName(), con );
             if(exists) {
+                //we won't create a new record if it already exists
                 throw new CouponDBException("Record already exists", c.getCompName() + " already exists in DB.");
             }
             helper.addRecord("Company",companyMap, con);
@@ -91,7 +95,7 @@ public class CompanyDBDAO implements CompanyDAO {
         {
             boolean exists = helper.cellExists("Company", "ID", "" + c.getId(), con);
            if(exists) {
-               Map<String, String> map = companyToMap(c);
+               TreeMap<String, Object> map = companyToMap(c);
                helper.updateRecord("Company",map, c.getId(), con);
            }
             else
@@ -145,10 +149,10 @@ public class CompanyDBDAO implements CompanyDAO {
 
         List<Company> companyList = null;
         try {
-            Collection<Map<String, String> > colMap = helper.getAllRecords("Company", null);//if called with null, connection will be created automatically
+            Collection<Map<String, Object> > colMap = helper.getAllRecords("Company", null);//if called with null, connection will be created automatically
             companyList = new LinkedList<>();
 
-            for(Map<String, String> compMap: colMap)
+            for(Map<String, Object> compMap: colMap)
             {
                 //mapToCompany() will convert maps to companies
                 companyList.add(mapToCompany(compMap));
@@ -170,37 +174,32 @@ public class CompanyDBDAO implements CompanyDAO {
 
     @Override
     public boolean login(String name, String pass) {
-        boolean loginSuccess = false;
+        boolean success = false;
+        try {
 
-        try(Connection con = DBConnection.getConnection())
-        {
-            boolean exists = helper.cellExists("Company", "COMP_NAME", name, con);
+            Map<String, Object> companyMap = helper.getRecordByValue("Company", "COMP_NAME",name, null);
+            if(companyMap == null)
+                throw new CouponDBException("Couldn't find user " + name, "Could not find user by the name " + name);
 
-            if(exists)
-            {
-                Company co = mapToCompany(helper.getRecord("Company", "COMP_NAME" , name, con));
-                if(name.equals(co.getCompName()) && pass.equals(co.getPassword()))
-                {
-                    loginSuccess = true;
-                    Logger.log("Login", name + " has just logged in.");
-                }
-                else
-                {
-                    Logger.log("Login failed", "Password and username do not match");
-                }
+            Company company = mapToCompany(companyMap);
+            if(company.getCompName().equals(name) && company.getPassword().equals(pass)) {
+                success = true;
+                Logger.log("User " + name + " just logged in", "User " + name + " successfully logged in just now");
             }
-            else
-            {
-                throw new CouponDBException("Log in failed", "Username " + name + " could not be found");
+            else {
+                success = false;
+                Logger.log("User " + name + " has failed to log in ", "");
             }
 
-        }
-        catch(SQLException e)
-        {
+
+
+        } catch (SQLException e) {
             Logger.log(e);
-            throw new CouponDBException("Error logging in", "Had some problem with DB while trying to login for user: " + name);
+            throw new CouponException("Could not log in for: " + name);
+
         }
-        return loginSuccess;
+
+        return success;
     }
 
     /*
@@ -208,9 +207,9 @@ public class CompanyDBDAO implements CompanyDAO {
      */
 
 
-    private Map<String, String> companyToMap(Company c)
+    private TreeMap<String, Object> companyToMap(Company c)
     {
-        Map<String, String> map = new HashMap<>();
+        TreeMap<String, Object> map = new TreeMap<>();
         map.put("ID", "" + c.getId());
         map.put("COMP_NAME", c.getCompName());
         map.put("PASSWORD", c.getPassword());
@@ -219,10 +218,10 @@ public class CompanyDBDAO implements CompanyDAO {
         return map;
     }
 
-    private Company mapToCompany(Map<String, String> map)
+    private Company mapToCompany(Map<String, Object> map)
     {
-        Company newCompany = new Company(map.get("COMP_NAME"), map.get("PASSWORD"), map.get("EMAIL"));
-        newCompany.setId(Long.parseLong(map.get("ID")));
+        Company newCompany = new Company((String)map.get("COMP_NAME"), (String)map.get("PASSWORD"), (String)map.get("EMAIL"));
+        newCompany.setId((Long)map.get("ID"));
 
         return newCompany;
 

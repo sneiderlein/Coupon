@@ -1,5 +1,6 @@
 package coupon.model;
 
+import java.sql.Date;
 import java.time.LocalDateTime;
 
 public class Coupon {
@@ -10,8 +11,8 @@ public class Coupon {
 
     private long id;
     private String title;
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
+    private Date startDate;
+    private Date endDate;
     private int amount;
     private CouponType type;
     private String message;
@@ -27,9 +28,9 @@ public class Coupon {
 
               long id,
               String title,
-              LocalDateTime endDate,
+              Date endDate,
               int amount,
-              LocalDateTime startDate,
+              Date startDate,
               CouponType type,
               String message,
               double price,
@@ -67,19 +68,19 @@ public class Coupon {
         this.title = title;
     }
 
-    public LocalDateTime getStartDate() {
+    public Date getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(LocalDateTime startDate) {
+    public void setStartDate(Date startDate) {
         this.startDate = startDate;
     }
 
-    public LocalDateTime getEndDate() {
+    public Date getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(LocalDateTime endDate) {
+    public void setEndDate(Date endDate) {
         this.endDate = endDate;
     }
 

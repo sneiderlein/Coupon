@@ -6,11 +6,13 @@ import coupon.dao.DBIOHelper;
 import coupon.exception.CouponDBException;
 import coupon.exception.CouponException;
 import coupon.model.Company;
+import coupon.model.Coupon;
+import coupon.model.CouponType;
 
 import java.sql.*;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.util.*;
 
 
 public class Test {
@@ -21,8 +23,9 @@ public class Test {
 //        CompanyDBDAO dao = new CompanyDBDAO();
 //
 //        try {
-        Company c1 = new Company("weeeeee", "OOOOOO", "asdasdasjgjgjgjg@asddd.com");
-//        Company c2 = new Company("2IByeBM", "jkasldkj", "jjdh@asddd.com");
+        Company c1 = new Company("WHeeel", "asdasdOOOOOO", "ererjgjg@asddd.com");
+        c1.setId(21);
+        Company c2 = new Company("2IByeBM", "jkasldkj", "jjdh@asddd.com");
 //        Company c3 = new Company("Joy", "asldkjjfi", "jjdh@asddd.com");
 //        Company c4 = new Company("Sway", "irotieo", "jjdh@asddd.com");
 //
@@ -57,28 +60,29 @@ public class Test {
         CompanyDBDAO dao = new CompanyDBDAO();
 
 
-        c1.setId(21);
+        SortedMap<String, Object> map = new TreeMap<>();
 
-        System.out.println(dao.login("Joy1", "theNewPass"));
+        map.put("AMOUNT", "76");
+        map.put("END_DATE", Date.valueOf(LocalDate.now()));
+        map.put("MESSAGE", "BLAHVLAHBLAH");
+        map.put("PRICE", "89.34");
+        map.put("START_DATE", Date.valueOf(LocalDate.now()));
+        map.put("TITLE", "Other coupon");
+        map.put("TYPE", CouponType.FOOD);
 
 
 
 
-        System.out.println("Exiting");
-    }
 
-    public static void printTable(String table)
-    {
-        DBIOHelper helper = new DBIOHelper();
-        Collection<Map<String, String> > map = null;
+ //       dao.createCompany(c2);
+
         try {
-            map = helper.getAllRecords(table, null);
-        } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println(dao.login("Jdsdsd", "asdasd"));
         }
-        for(Map<String, String> lil : map)
+        catch(CouponException e)
         {
-            System.out.println(lil);
+
         }
     }
+
 }

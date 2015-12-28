@@ -4,38 +4,93 @@ import com.sun.istack.internal.Nullable;
 import com.sun.org.apache.xml.internal.security.encryption.CipherData;
 import coupon.Logger;
 import coupon.exception.CouponException;
+import coupon.model.CouponType;
 
 import java.sql.*;
+import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class DBIOHelper {
 
 
-    public void addRecord(String table, Map<String, String> recordMap, @Nullable Connection con) throws SQLException
+    public void addRecord(String table, SortedMap<String, Object> recordMap, @Nullable Connection con) throws SQLException
     {
-        //Check if map is nullpointer
-        if(recordMap == null)
-            throw new CouponException("Empty record was entered", "Empty (nullpointer) record for writing to db was sent.");
 
-        //Get connection from the pool if was not passed
-        //If connection was created here we have to close it if not the caller will have to.
+        /*
+        Takes a sorted map and destination table as an argument writes it to the SQL DB.
+        The map contains the column name as the key and the value as the value
+        Connection can be passed as an argument also, if null is passed, conection will
+        be created and closed when done.
+         */
+
         boolean needToClose = false;
         if(con == null) {
             con = DBConnection.getConnection();
             needToClose = true;
         }
 
+        //Prepare the statement before executing it
+        String sql = "INSERT INTO " + table  + " ( ";
+        Iterator<String> keyIter = recordMap.keySet().iterator();
+        Iterator<Object> objIter = recordMap.values().iterator();
 
-        //Get formatted string out of map [result[0]= col, col2][result[1] = 'val', 'val2']
-        String[] formatResult = queryFormatVals(recordMap);
+        //add column names to the statement
+        while(keyIter.hasNext())
+        {
+            sql += keyIter.next();
+            if(keyIter.hasNext())
+                sql += ", ";
+        }
 
-        //Prepare sql query
-        String sql = "INSERT INTO "+ table +" (" + formatResult[0] + ") VALUES (" + formatResult[1] +")";
-        Logger.log("Adding record to DB", sql);
-        Statement st = con.createStatement();
-        st.execute(sql);
+        sql += " ) VALUES (";
 
-        st.close();
+        //use ? signs to indicate the values for the prepared statement
+
+        while(objIter.hasNext())
+        {
+            objIter.next();
+            sql += "?";
+
+            if(objIter.hasNext())
+                sql += ", ";
+
+        }
+        sql += ")";
+
+        //sql should look like "INSERT INTO Company (col1, col2, col3) VALUES (?, ?, ?);
+
+        PreparedStatement pst = con.prepareStatement(sql);
+        int count = 1;
+        for(Map.Entry<String, Object> entry : recordMap.entrySet())
+        {
+            //Use correct PreparedStatement setter according to the object type
+            if(entry.getValue() instanceof String)
+            {
+                pst.setString(count++, (String)entry.getValue());
+            }
+            else if(entry.getValue() instanceof java.sql.Date)
+            {
+
+                pst.setDate(count++, (java.sql.Date)entry.getValue());
+            }
+            else if(entry.getValue() instanceof CouponType)
+            {
+                pst.setString(count++, ((CouponType)entry.getValue()).name());
+            }
+            else
+            {
+                pst.setObject(count++, entry.getValue());
+            }
+        }
+
+        //Execute the query
+        pst.execute();
+
+
+        Logger.log("Record Added", pst.toString());
+
+        //If the connection was created here we should close it
         if(needToClose)
             con.close();
 
@@ -51,77 +106,94 @@ public class DBIOHelper {
         }
 
 
+        //Prepare the statement
         String sql = "DELETE FROM " + table + " WHERE ID = " + id;
         Statement st = con.createStatement();
+        //Execute the sql query
         st.execute(sql);
-
-
         st.close();
+
+        Logger.log("DB record deleted", sql);
+
+        //IF the connection was created here, we should close it
         if(needToClose)
             con.close();
 
     }
 
-    public void updateRecord(String table, Map<String, String> recordMap ,long id,@Nullable Connection con)throws SQLException
+    public void updateRecord(String table, SortedMap<String, Object> recordMap, long id, @Nullable Connection con) throws SQLException
     {
-        //If connection was created here we have to close it if not the caller will have to.
+
+         /*
+        Takes a sorted map and destination table as an argument writes it to the SQL DB.
+        The map contains the column name as the key and the value as the value
+        Connection can be passed as an argument also, if null is passed, connection will
+        be created and closed when done.
+         */
         boolean needToClose = false;
         if(con == null) {
             con = DBConnection.getConnection();
             needToClose = true;
         }
 
+        //prepare the statement
+        String sql = "UPDATE " + table  + " SET ";
 
-        //Prepare SQL query
-        String sql = "UPDATE " + table + " SET ";
-
+        //We will need an indication to where we are in the loop
         int count = 1;
-        for(Map.Entry<String, String> entry : recordMap.entrySet())
+        for(Map.Entry<String, Object> entry : recordMap.entrySet())
         {
-            sql += entry.getKey() + " = " + surroundWithSingleQuotes(entry.getValue());
+            //Populate the query with '?'s for Prepared statement
+            sql += entry.getKey() + " =  ?" ;
+
+            //Don't add ',' in the end of parameter list
             if(count++ < recordMap.size())
             {
                 sql += ", ";
             }
 
-
         }
         sql += " WHERE ID = " + id + ";";
-        Logger.log("Update DB ", sql);
 
-        Statement st = con.createStatement();
-        st.execute(sql);
-        st.close();
+        PreparedStatement pst = con.prepareStatement(sql);
 
+        //For parameter index in Prepared statement
+        int count2 = 1;
+        for(Map.Entry<String, Object> entry : recordMap.entrySet())
+        {
+            //Populate PreparedStatement with the right types
+            if(entry.getValue() instanceof String)
+            {
+                pst.setString(count2++, (String)entry.getValue());
+            }
+            else if(entry.getValue() instanceof java.sql.Date)
+            {
 
-        if(needToClose)
-            con.close();
-
-    }
-    public void updateCell(String table, String col, long id, String value, @Nullable Connection con)throws SQLException
-    {
-        //If connection was created here we have to close it if not the caller will have to.
-        boolean needToClose = false;
-        if(con == null) {
-            con = DBConnection.getConnection();
-            needToClose = true;
+                pst.setDate(count2++, (java.sql.Date)entry.getValue());
+            }
+            else if(entry.getValue() instanceof CouponType)
+            {
+                pst.setString(count2++, ((CouponType)entry.getValue()).name());
+            }
+            else
+            {
+                pst.setObject(count2++, entry.getValue());
+            }
         }
 
-        String sql = "UPDATE " + table + " SET " + col + " = '" + value + "' WHERE ID = " + id;
-        Logger.log("Update Cell", sql);
+        pst.execute();
+        pst.close();
 
-        Statement st = con.createStatement();
-        st.execute(sql);
-
-
-        st.close();
 
         if(needToClose)
             con.close();
+
+
     }
 
-    public Map<String, String> getRecord(String table, long id, @Nullable Connection con)throws SQLException
+    public Map<String, Object> getRecord(String table, long id, @Nullable Connection con)throws SQLException
     {
+
         //If connection was created here we have to close it if not the caller will have to.
         boolean needToClose = false;
         if(con == null) {
@@ -136,66 +208,43 @@ public class DBIOHelper {
         Statement st = con.createStatement();
         ResultSet rs = st.executeQuery(sql);
 
-        //Create a map which will be returned
-        Map<String, String> resultMap = new HashMap<>();
+        ResultSetMetaData meta = rs.getMetaData();
+        Map<String, Object> recordMap = new HashMap<>();
+        while(rs.next()) {
+            for (int i = 1; i <= meta.getColumnCount(); i++) {
+                //Add every column to the Map
+                recordMap.put(meta.getColumnName(i), rs.getObject(i));
 
-        while(rs.next())
-        {
-            resultMap.put("ID", rs.getString("ID"));
-            resultMap.put("COMP_NAME", rs.getString("COMP_NAME"));
-            resultMap.put("PASSWORD", rs.getString("PASSWORD"));
-            resultMap.put("EMAIL", rs.getString("EMAIL"));
-
+            }
         }
-
-
-        rs.close();
-        st.close();
-
         if(needToClose)
             con.close();
 
-        return resultMap;
+        return recordMap;
+
     }
-public Map<String, String> getRecord(String table, String col ,String value, @Nullable Connection con)throws SQLException
+
+    public Map<String, Object> getRecordByValue(String table, String col, Object value, @Nullable Connection con)throws SQLException
     {
-        //If connection was created here we have to close it if not the caller will have to.
         boolean needToClose = false;
         if(con == null) {
             con = DBConnection.getConnection();
             needToClose = true;
         }
-
-        String sql = "SELECT * FROM " + table + " WHERE "+ col + " = '" + value + "'";
-
-        Logger.log("Getting DB Record", sql);
-
-        Statement st = con.createStatement();
-        ResultSet rs = st.executeQuery(sql);
-
-        //Create a map which will be returned
-        Map<String, String> resultMap = new HashMap<>();
-
-        while(rs.next())
-        {
-            resultMap.put("ID", rs.getString("ID"));
-            resultMap.put("COMP_NAME", rs.getString("COMP_NAME"));
-            resultMap.put("PASSWORD", rs.getString("PASSWORD"));
-            resultMap.put("EMAIL", rs.getString("EMAIL"));
-
+        Map<String, Object> recordMap = null;
+        long id = findCellID(table, col, value, con);
+        if(id >= 0) {
+            recordMap = getRecord(table, id, con);
         }
 
 
-        rs.close();
-        st.close();
-
         if(needToClose)
             con.close();
-
-        return resultMap;
+        return recordMap;
     }
 
-    public Collection<Map<String, String> > getAllRecords(String table, @Nullable Connection con)throws SQLException
+
+    public Collection<Map<String, Object> > getAllRecords(String table, @Nullable Connection con)throws SQLException
     {
         //Connection can be created outside, and sent here, so that the sender can chain many
         //calls to the DB using only one connection.
@@ -207,7 +256,7 @@ public Map<String, String> getRecord(String table, String col ,String value, @Nu
         }
 
         //Return a collection of maps which represent records in DB
-        Collection<Map<String, String>  > mapCollection = new LinkedList<>();
+        Collection<Map<String, Object>  > mapCollection = new LinkedList<>();
 
         String sql = "SELECT * FROM " + table;
         Logger.log("Getting All DB Record", sql);
@@ -218,7 +267,7 @@ public Map<String, String> getRecord(String table, String col ,String value, @Nu
         ResultSetMetaData meta = rs.getMetaData();
 
         //One of the records
-        Map<String, String> recordMap = null;
+        Map<String, Object> recordMap = null;
 
         while(rs.next())
         {
@@ -227,7 +276,7 @@ public Map<String, String> getRecord(String table, String col ,String value, @Nu
             for(int i = 1; i <= meta.getColumnCount(); i++)
             {
                 //Add every column to the Map
-                recordMap.put(meta.getColumnName(i), rs.getString(i));
+                recordMap.put(meta.getColumnName(i), rs.getObject(i));
 
             }
 
@@ -236,6 +285,8 @@ public Map<String, String> getRecord(String table, String col ,String value, @Nu
         }
 
 
+        if(needToClose)
+            con.close();
 
         return mapCollection;
     }
@@ -256,6 +307,31 @@ public Map<String, String> getRecord(String table, String col ,String value, @Nu
         ResultSet rs = st.executeQuery(sql);
 
         return rs.next();
+    }
+
+    public long findCellID(String table, String col, Object val, @Nullable Connection con) throws SQLException
+    {
+        boolean needToClose = false;
+        if(con == null) {
+            con = DBConnection.getConnection();
+            needToClose = true;
+        }
+
+        String sql = "SELECT ID FROM " + table + " WHERE " + col + " = ?";
+        PreparedStatement pst = con.prepareStatement(sql);
+        pst.setObject(1, val);
+        ResultSet rs = pst.executeQuery();
+
+        long result = 0;
+        if(rs.next())
+            result = rs.getInt(1);
+        else
+            result = -1;
+
+        if(needToClose)
+            con.close();
+
+        return result;
     }
     /*
     Private methods
@@ -291,6 +367,8 @@ public Map<String, String> getRecord(String table, String col ,String value, @Nu
         return result;
 
     }
+
+
 
     private String surroundWithSingleQuotes(String initial)
     {
