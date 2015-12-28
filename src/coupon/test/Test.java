@@ -20,6 +20,8 @@ public class Test {
 
     public static void main(String[] args) throws SQLException {
 
+
+        //Something new
 //        CompanyDBDAO dao = new CompanyDBDAO();
 //
 //        try {
