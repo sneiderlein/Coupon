@@ -20,7 +20,7 @@ public class DBIOHelper {
         /*
         Takes a sorted map and destination table as an argument writes it to the SQL DB.
         The map contains the column name as the key and the value as the value
-        Connection can be passed as an argument also, if null is passed, conection will
+        Connection can be passed as an argument also, if null is passed, connection will
         be created and closed when done.
          */
 
