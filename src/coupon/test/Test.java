@@ -17,17 +17,16 @@ public class Test {
 
     public static void main(String[] args) throws Exception{
 
-        CouponDAO dao = new CouponDBDAO();
+        CouponDAO couponDAO = new CouponDBDAO();
+        CompanyDAO companyDAO = new CompanyDBDAO();
+        CustomerDAO customerDAO = new CustomerDBDAO();
 
 
-        String message = "Coupon shmoupon!";
 
-        Coupon c1 = new Coupon(
-                "The Shmoupon",  LocalDate.now(), LocalDate.of(2016, 2, 27),
-                CouponType.FOOD, 14, 78.23, "THEPATHHH!", message);
 
-           c1.setId(6);
-        System.out.println(dao.exists(c1));
+       Customer cust = customerDAO.getCustomer(3);
+        System.out.println("Coupons that belong to "+ cust.getCustName());
+        System.out.println(customerDAO.getAllCoupons(cust));
 
 
 

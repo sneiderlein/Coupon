@@ -1,10 +1,12 @@
 package coupon.dao;
 
+import com.sun.org.apache.bcel.internal.generic.Select;
 import coupon.Logger;
 import coupon.exception.CouponDBException;
 import coupon.exception.CouponException;
 import coupon.model.Company;
 import coupon.model.Coupon;
+import coupon.model.CouponType;
 
 import java.sql.*;
 import java.util.*;
@@ -55,6 +57,12 @@ public class CompanyDBDAO implements CompanyDAO {
         //Clean up
         pst.close();
         con.close();
+
+    }
+
+    @Override
+    public void removeAllItsCoupons(Company c) throws SQLException {
+
 
     }
 
@@ -164,11 +172,48 @@ public class CompanyDBDAO implements CompanyDAO {
     }
 
     @Override
-    public Collection<Coupon> getCoupons()
+    public Collection<Coupon> getCoupons(Company c)throws SQLException
     {
+        //Create return list
+        Collection<Coupon> allPossesedCoupons = new LinkedList<>();
 
-        //TODO: Implement when working with coupons
-        return null;
+        //Get connection from the pool
+        Connection con = DBConnection.getConnection();
+
+        //Get all ID's of the coupons that belong to company
+        String sql = "SELECT * FROM Coupon " +
+                    "WHERE Coupon.ID IN (  " +
+                    "SELECT COUPON_ID " +
+                    "FROM Company_Coupon " +
+                    "WHERE COMP_ID = ?)";
+        PreparedStatement pst = con.prepareStatement(sql);
+        pst.setLong(1, c.getId());
+
+        //Execute and catch the resultSet
+        ResultSet rs = pst.executeQuery();
+
+        //Read the contents to the list
+        int counter = 0;
+        while(rs.next())
+        {
+            Coupon coupon = new Coupon
+                    (
+                            rs.getString("TITLE"), rs.getDate("START_DATE").toLocalDate(),
+                            rs.getDate("END_DATE").toLocalDate(), CouponType.valueOf(rs.getString("TYPE")),
+                            rs.getInt("AMOUNT"), rs.getDouble("PRICE"), rs.getString("IMAGE_PATH"),
+                            rs.getString("MESSAGE")
+                    );
+            allPossesedCoupons.add(coupon);
+            counter++;
+        }
+        //Log it
+        Logger.log(counter + " coupons were loaded", pst.toString());
+
+        //Clean up
+        pst.close();
+        con.close();
+
+        return allPossesedCoupons;
     }
 
     @Override

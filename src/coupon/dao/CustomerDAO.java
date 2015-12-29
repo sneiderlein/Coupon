@@ -14,7 +14,7 @@ public interface CustomerDAO
     void updateCustomer(Customer c)throws SQLException;
     Customer getCustomer(long id)throws SQLException;
     Collection<Customer> getAllCustomers()throws SQLException;
-    Collection<Coupon> getAllCoupons()throws SQLException;
+    Collection<Coupon> getAllCoupons(Customer c)throws SQLException;
     boolean login(String name, String pass)throws SQLException;
     boolean exists(Customer c)throws SQLException;
 }
