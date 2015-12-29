@@ -1,26 +1,32 @@
 package coupon.dao;
 
 import coupon.Logger;
-import coupon.exception.CouponDBException;
-import coupon.exception.CouponException;
-import coupon.model.Company;
 import coupon.model.Coupon;
+import coupon.model.Customer;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.LinkedList;
 
-public class CompanyDBDAO implements CompanyDAO {
+/**
+ * Created by farhod on 29/12/15.
+ */
+public class CustomerDBDAO implements CustomerDAO {
+
 
     @Override
-    public void createCompany(Company c) throws SQLException
+    public void createCustomer(Customer c) throws SQLException
     {
         //Get a connection from the pool
         Connection con = DBConnection.getConnection();
 
         //Prepare a statement
-        String sql = "INSERT INTO Company (COMP_NAME, PASSWORD, EMAIL) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO Customer (CUST_NAME, PASSWORD, EMAIL) VALUES (?, ?, ?)";
         PreparedStatement pst = con.prepareStatement(sql);
-        pst.setString(1, c.getCompName());
+        pst.setString(1, c.getCustName());
         pst.setString(2, c.getPassword());
         pst.setString(3, c.getEmail());
 
@@ -28,46 +34,48 @@ public class CompanyDBDAO implements CompanyDAO {
         pst.execute();
 
         //log the fact
-        Logger.log("Company added", pst.toString());
+        Logger.log("Customer added", pst.toString());
 
         //Clean up
         pst.close();
         con.close();
+
+
     }
 
     @Override
-    public void removeCompany(Company c) throws SQLException
+    public void removeCustomer(Customer c) throws SQLException
     {
         //Get connection from the pool
         Connection con = DBConnection.getConnection();
 
         //Prepare a statement
-        String sql = "DELETE FROM Company WHERE COMP_NAME = ?";
+        String sql = "DELETE FROM Customer WHERE CUST_NAME = ?";
         PreparedStatement pst = con.prepareStatement(sql);
-        pst.setString(1, c.getCompName());
+        pst.setString(1, c.getCustName());
 
         //Execute
         pst.execute();
 
         //log it
-        Logger.log("Company deleted", pst.toString());
+        Logger.log("Customer deleted", pst.toString());
 
         //Clean up
         pst.close();
         con.close();
-
     }
 
     @Override
-    public void updateCompany(Company c)throws SQLException
+    public void updateCustomer(Customer c)throws SQLException
     {
+
         //Get connection from the pool
         Connection con = DBConnection.getConnection();
 
         //Prepare a statement
-        String sql = "UPDATE Company SET COMP_NAME = ?, PASSWORD = ?, EMAIL = ?";
+        String sql = "UPDATE Customer SET CUST_NAME = ?, PASSWORD = ?, EMAIL = ?";
         PreparedStatement pst = con.prepareStatement(sql);
-        pst.setString(1, c.getCompName());
+        pst.setString(1, c.getCustName());
         pst.setString(2, c.getPassword());
         pst.setString(3, c.getEmail());
 
@@ -75,7 +83,7 @@ public class CompanyDBDAO implements CompanyDAO {
         pst.execute();
 
         //log it
-        Logger.log("Company updated", pst.toString());
+        Logger.log("Customer updated", pst.toString());
 
         //clean up
         pst.close();
@@ -84,16 +92,16 @@ public class CompanyDBDAO implements CompanyDAO {
     }
 
     @Override
-    public Company getCompany(long id) throws SQLException
+    public Customer getCustomer(long id) throws SQLException
     {
-        //Create a company instance to return (meanwhile null)
-        Company companyToReturn = null;
+        //Create a customer instance to return (meanwhile null)
+        Customer customer = null;
 
         //Get a connection from the pool
         Connection con = DBConnection.getConnection();
 
         //Prepare a statement
-        String sql = "SELECT * FROM Company WHERE ID = ?";
+        String sql = "SELECT * FROM Customer WHERE ID = ?";
         PreparedStatement pst = con.prepareStatement(sql);
         pst.setLong(1, id);
 
@@ -103,17 +111,16 @@ public class CompanyDBDAO implements CompanyDAO {
         //Read the result set
         if(rs.next())
         {
-            companyToReturn = new Company(rs.getString("COMP_NAME"),
-                                                rs.getString("PASSWORD"), rs.getString("EMAIL"));
-            companyToReturn.setId(rs.getLong("ID"));
-
+            customer = new Customer(rs.getString("CUST_NAME"),
+                    rs.getString("PASSWORD"), rs.getString("EMAIL"));
+            customer.setId(rs.getLong("ID"));
         }
 
         //Log it
-        if(!(companyToReturn == null))
-            Logger.log("Company Successfully read from DB", pst.toString());
+        if(customer != null)
+            Logger.log("Customer Successfully read from DB", pst.toString());
         else
-        Logger.log("No company was found", pst.toString());
+            Logger.log("No customer was found", pst.toString());
 
         //Clean up
         pst.close();
@@ -121,53 +128,51 @@ public class CompanyDBDAO implements CompanyDAO {
         con.close();
 
         //If nothing was found null will be returned
-        return companyToReturn;
+        return customer;
     }
 
     @Override
-    public Collection<Company> getAllCompanies() throws SQLException
+    public Collection<Customer> getAllCustomers() throws SQLException
     {
         //Create a collection that will be returned
-        Collection<Company> companies = new LinkedList<>();
+        Collection<Customer> customers = new LinkedList<>();
 
         //Get a connection from the pool
         Connection con = DBConnection.getConnection();
 
         //Prepare a statement
-        String sql = "SELECT * FROM Company";
+        String sql = "SELECT * FROM Customer";
         PreparedStatement pst = con.prepareStatement(sql);
 
         //Get the result set
         ResultSet rs = pst.executeQuery();
 
         //Read the result set
-        int companyCount = 0;
+        int customerCount = 0;
         while(rs.next())
         {
-            Company c = new Company(rs.getString("COMP_NAME"),
+            Customer c = new Customer(rs.getString("CUST_NAME"),
                     rs.getString("PASSWORD"), rs.getString("EMAIL"));
             c.setId(rs.getLong("ID"));
 
-            companies.add(c);
-            companyCount++;
+            customers.add(c);
+            customerCount++;
         }
 
         //Log it
-        Logger.log(companyCount + " companies were loaded", pst.toString());
+        Logger.log(customerCount + " customers were loaded", pst.toString());
 
         //CLean up
         pst.close();
         rs.close();
         con.close();
 
-        return companies;
+        return customers;
     }
 
     @Override
-    public Collection<Coupon> getCoupons()
-    {
-
-        //TODO: Implement when working with coupons
+    public Collection<Coupon> getAllCoupons() {
+        //TODO: Implement when done with coupons
         return null;
     }
 
@@ -180,7 +185,7 @@ public class CompanyDBDAO implements CompanyDAO {
         Connection con = DBConnection.getConnection();
 
         //prepare a statement
-        String sql = "SELECT COMP_NAME, PASSWORD FROM Company WHERE COMP_NAME = ?";
+        String sql = "SELECT CUST_NAME, PASSWORD FROM Customer WHERE CUST_NAME = ?";
         PreparedStatement pst = con.prepareStatement(sql);
         pst.setString(1, name);
 
@@ -189,7 +194,7 @@ public class CompanyDBDAO implements CompanyDAO {
         if(rs.next())
         {
             //Check if it matches
-            if(name.equals(rs.getString("COMP_NAME"))
+            if(name.equals(rs.getString("CUST_NAME"))
                     && pass.equals(rs.getString("PASSWORD")))
             {
                 success = true;
@@ -212,25 +217,30 @@ public class CompanyDBDAO implements CompanyDAO {
         con.close();
 
         return success;
+
     }
 
     @Override
-    public boolean exists(Company c) throws SQLException {
+    public boolean exists(Customer c) throws SQLException
+    {
         //Get a connection from the pool
         Connection con = DBConnection.getConnection();
 
         //Prepare a statement
-        String sql = "SELECT EXISTS(SELECT 1 FROM Company WHERE COMP_NAME=?)";
+        String sql = "SELECT EXISTS(SELECT 1 FROM Customer WHERE CUST_NAME=?)";
         PreparedStatement pst = con.prepareStatement(sql);
-        pst.setString(1, c.getCompName());
+        pst.setString(1, c.getCustName());
 
         //Execute it and get the result set
         ResultSet rs = pst.executeQuery();
 
         //Check the answer
         rs.next();
-
         boolean exists = rs.getBoolean(1);
+
+        //Log it
+        Logger.log("Customer exists check", "Customer '" + c.getCustName() +
+                ((exists)?"' exists":"' doesn't exist"));
 
         //Clean up
         rs.close();

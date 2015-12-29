@@ -9,12 +9,12 @@ import java.util.Collection;
 
 public interface CompanyDAO {
 
-    void createCompany(Company c) throws SQLException, CouponDBException;
-    void removeCompany(Company c);
-    void updateCompany(Company c);
-    Company getCompany(long id);
-    Collection<Company> getAllCompanies();
-    Collection<Coupon> getCoupons();
-    boolean login(String name, String pass);
-
+    void createCompany(Company c) throws SQLException;
+    void removeCompany(Company c) throws SQLException;
+    void updateCompany(Company c) throws SQLException;
+    Company getCompany(long id) throws SQLException;
+    Collection<Company> getAllCompanies() throws SQLException;
+    Collection<Coupon> getCoupons() throws SQLException;
+    boolean login(String name, String pass) throws SQLException;
+    boolean exists(Company c) throws SQLException;
 }

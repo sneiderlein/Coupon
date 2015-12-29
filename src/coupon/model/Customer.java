@@ -9,19 +9,59 @@ public class Customer {
     */
     private long id;
     private String custName;
-    private String Password;
+    private String password;
     private Collection<Coupon> coupons;
+    private String email;
     
     /*
     Constructors
     */
 
-    public Customer(long id, String custName, String password, Collection<Coupon> coupons) {
-        this.id = id;
+    public Customer(String custName, String password, String email) {
         this.custName = custName;
-        Password = password;
+        this.password = password;
+        this.email = email;
+    }
+    /*
+    Getters and Setters
+     */
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getCustName() {
+        return custName;
+    }
+
+    public void setCustName(String custName) {
+        this.custName = custName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Collection<Coupon> getCoupons() {
+        return coupons;
+    }
+
+    public void setCoupons(Collection<Coupon> coupons) {
         this.coupons = coupons;
     }
+
+    public String getEmail() {
+        return email;
+    }
+
     /*
     Methods
     */
@@ -31,7 +71,7 @@ public class Customer {
         return "Customer{" +
                 "id=" + id +
                 ", custName='" + custName + '\'' +
-                ", Password='" + Password + '\'' +
+                ", password='" + password + '\'' +
                 ", coupons=" + coupons +
                 '}';
     }

@@ -1,13 +1,12 @@
 package coupon.test;
 
-import coupon.dao.CompanyDAO;
-import coupon.dao.CompanyDBDAO;
-import coupon.dao.DBIOHelper;
+import coupon.dao.*;
 import coupon.exception.CouponDBException;
 import coupon.exception.CouponException;
 import coupon.model.Company;
 import coupon.model.Coupon;
 import coupon.model.CouponType;
+import coupon.model.Customer;
 
 import java.sql.*;
 import java.sql.Date;
@@ -20,71 +19,16 @@ public class Test {
 
     public static void main(String[] args) throws SQLException {
 
+        Customer c1 = new Customer("My name", "My password is", "My email is");
+        Customer c2 = new Customer("Your name is", "Your password is", "your email is");
 
-        //Something new
-//        CompanyDBDAO dao = new CompanyDBDAO();
-//
-//        try {
-        Company c1 = new Company("WHeeel", "asdasdOOOOOO", "ererjgjg@asddd.com");
-        c1.setId(21);
-        Company c2 = new Company("2IByeBM", "jkasldkj", "jjdh@asddd.com");
-//        Company c3 = new Company("Joy", "asldkjjfi", "jjdh@asddd.com");
-//        Company c4 = new Company("Sway", "irotieo", "jjdh@asddd.com");
-//
-//
-//
-//
-//            DBIOHelper helper = new DBIOHelper();
-//            helper.deleteRecord("Company", 12l, null);
-//
-//            dao.createCompany(c1);
-//            dao.createCompany(c2);
-//            dao.createCompany(c3);
-//            dao.createCompany(c4);
-//
-//
-//
-//        }
-//        catch(CouponDBException e)
-//        {
-//            e.printStackTrace();
-//        }
-//        catch(CouponException e)
-//        {
-//            System.out.println(e.toString());
-//        }
-//        catch(SQLException e)
-//        {
-//            e.printStackTrace();
-//        }
-
-        DBIOHelper helper = new DBIOHelper();
-        CompanyDBDAO dao = new CompanyDBDAO();
+        CustomerDAO cDao = new CustomerDBDAO();
 
 
-        SortedMap<String, Object> map = new TreeMap<>();
-
-        map.put("AMOUNT", "76");
-        map.put("END_DATE", Date.valueOf(LocalDate.now()));
-        map.put("MESSAGE", "BLAHVLAHBLAH");
-        map.put("PRICE", "89.34");
-        map.put("START_DATE", Date.valueOf(LocalDate.now()));
-        map.put("TITLE", "Other coupon");
-        map.put("TYPE", CouponType.FOOD);
+        System.out.println(cDao.getCustomer(2));
 
 
+       }
 
-
-
- //       dao.createCompany(c2);
-
-        try {
-            System.out.println(dao.login("Jdsdsd", "asdasd"));
-        }
-        catch(CouponException e)
-        {
-
-        }
-    }
 
 }

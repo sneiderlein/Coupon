@@ -11,7 +11,7 @@ import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.*;
 
-public class DBIOHelper {
+public class DBIOHelper{
 
 
     public void addRecord(String table, SortedMap<String, Object> recordMap, @Nullable Connection con) throws SQLException
