@@ -8,24 +8,27 @@ import coupon.model.Coupon;
 import coupon.model.CouponType;
 import coupon.model.Customer;
 
-import java.sql.*;
-import java.sql.Date;
-import java.time.LocalDate;
+import java.time.*;
 import java.util.*;
 
 
 public class Test {
 
 
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) throws Exception{
 
-        Customer c1 = new Customer("My name", "My password is", "My email is");
-        Customer c2 = new Customer("Your name is", "Your password is", "your email is");
-
-        CustomerDAO cDao = new CustomerDBDAO();
+        CouponDAO dao = new CouponDBDAO();
 
 
-        System.out.println(cDao.getCustomer(2));
+        String message = "Coupon shmoupon!";
+
+        Coupon c1 = new Coupon(
+                "The Shmoupon",  LocalDate.now(), LocalDate.of(2016, 2, 27),
+                CouponType.FOOD, 14, 78.23, "THEPATHHH!", message);
+
+           c1.setId(6);
+        System.out.println(dao.exists(c1));
+
 
 
        }

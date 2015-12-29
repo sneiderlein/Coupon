@@ -1,6 +1,7 @@
 package coupon.model;
 
 import java.sql.Date;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class Coupon {
@@ -11,8 +12,8 @@ public class Coupon {
 
     private long id;
     private String title;
-    private Date startDate;
-    private Date endDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
     private int amount;
     private CouponType type;
     private String message;
@@ -24,28 +25,24 @@ public class Coupon {
      */
 
     public Coupon(
-
-
-              long id,
-              String title,
-              Date endDate,
-              int amount,
-              Date startDate,
-              CouponType type,
-              String message,
-              double price,
-              String imagePath
+            String title,
+            LocalDate startDate,
+            LocalDate endDate,
+            CouponType type,
+            int amount,
+            double price,
+            String imagePath,
+            String message
 
     ) {
-        this.id = id;
+        this.imagePath = imagePath;
         this.title = title;
         this.endDate = endDate;
         this.amount = amount;
         this.startDate = startDate;
+        this.price = price;
         this.type = type;
         this.message = message;
-        this.price = price;
-        this.imagePath = imagePath;
     }
 
     /*
@@ -68,19 +65,19 @@ public class Coupon {
         this.title = title;
     }
 
-    public Date getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
     }
 
-    public Date getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(Date endDate) {
+    public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
 
@@ -99,6 +96,7 @@ public class Coupon {
     public void setType(CouponType type) {
         this.type = type;
     }
+
 
     public String getMessage() {
         return message;
@@ -127,6 +125,8 @@ public class Coupon {
     /*
     Methods
      */
+
+
 
     @Override
     public String toString() {
